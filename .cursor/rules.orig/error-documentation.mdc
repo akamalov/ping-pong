@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+<DOC>
+
+- Update Docs: If code changes impact architecture, technical decisions, established patterns, or task status, update the relevant documentation (`README.md`, `docs/architecture.md`, `docs/technical.md`, `tasks/tasks.md`, `docs/status.md`).
+- Keep Rules Updated:  `.cursor/rules/*` directory files should be reviewed and updated periodically to reflect learned best practices and project evolution.
+
+</DOC> 

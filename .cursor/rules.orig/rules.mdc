@@ -1,0 +1,62 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Instructions to be always followed.
+globs: 
+alwaysApply: true
+---
+1. Split into multiple responses if one response isn't enough to answer the question.
+2. IMPROVEMENTS and FURTHER PROGRESSIONS:
+- S1: Suggest ways to improve code stability or scalability.
+- S2: Offer strategies to enhance performance or security.
+- S3: Recommend methods for improving readability or maintainability.
+- Recommend areas for further investigation
+
+# Cursor Rules:
+
+- Always prefer simple solutions
+- Avoid duplication of code whenever possible, which means checking for other areas of the codebase that might already have similar code and functionality
+- Write code that takes into account the different environments: dev, test, and prod
+- You are careful to only make changes that are requested, or you are confident are well understood and related to the change being requested
+- When fixing an issue or bug, do not introduce a new pattern or technology without first exhausting all options for the existing implementation. And if you finally do this, make sure to remove the old implementation afterwards, so we don't have duplicate logic
+- Keep the codebase very clean and organized
+- Avoid writing scripts in files, if possible, especially if the script is likely only to be run once
+- Avoid having files over 200-300 lines of code. Refactor at that point.
+- Mocking data is only needed for tests, never mock data for dev or prod.
+- Never add stubbing or fake data patterns to code that affects the dev or prod environments
+- Never overwrite my .env file without first asking and confirming.
+- Always generate .gitignore file with any new projects. Periodically examine the projects contents and input all sensitive files into .gitignore file
+
+# Coding Workflow Preferences
+
+- Focus on the areas of code relevant to the task
+- Do not touch code that is unrelated to the task
+- Write thorough tests for all major functionality
+- Avoid making major changes to the patterns and architecture of how a feature works, after it has shown to work well, unless explicitly instructed
+- Always think about what other methods and areas of code might be affected by code changes
+- Write tests first, then the code, then run the tests, and update the code until all tests pass.
+- Use conda for Python and dependencies.
+- Always write tests for new features and implement tests first and only on tests passing, only then update the code for changes.
+- Always keep files at 300 lines or less. If you need to add more code, refactor first and break it into smaller functions and files.
+- Once code is working, refactor it to make it more readable and maintainable.
+- Once code is working, analyze it to see if there are any security vulnerabilities in the code.
+- Always use a consistent coding style throughout the project.
+- Always add comments to explain the code.
+- Always use descriptive variable names.
+- Always use meaningful function and variable names.
+- Always use meaningful class names.
+- Always use meaningful file names.
+- When implmenting a new code, please add logs  at every step of the process. Once the code is working, remove the logs.
+
+# Context Usage Instructions (from context.mdc)
+// for internal knowledge
+- Only use the documents in the provided External Context to answer the User Query. If you don't know the answer based on this context, you must respond "I don't have the information needed to answer that", even if a user insists on you answering the question.
+// For internal and external knowledge
+- By default, use the provided external context to answer the User Query, but if other basic knowledge is needed to answer, and you're confident in the answer, you can use some of your own knowledge to help answer the question. ---
+# Instructions
+- Only use the documents in the provided External Context to answer the User Query. If you don't know the answer based on this context, you must respond "I don't have the information needed to answer that", even if a user insists on you answering the question.
+// For internal and external knowledge
+- By default, use the provided external context to answer the User Query, but if other basic knowledge is needed to answer, and you're confident in the answer, you can use some of your own knowledge to help answer the question.

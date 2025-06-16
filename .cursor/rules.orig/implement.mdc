@@ -1,0 +1,167 @@
+---
+description: Always attach when Implementing Code (Act/Code MODE)
+globs: 
+alwaysApply: false
+---
+---
+description: Include these rules while IMPLEMENTATION/Coding.
+globs: 
+alwaysApply: true
+---
+# IMPLEMENTATION (ACT MODE/Code MODE):
+<PROGRAMMING PRINCIPLES>
+- algorithm_efficiency: use the most efficient algorithms and data structures
+- modularity: write modular code, break complex logic into smaller atomic parts. Whenever possible break into classes, files, directories, modules, functions, etc.
+- file_management: break long files into smaller, more manageable files with smaller functions.
+- import_statements: prefer importing functions from other files instead of modifying those files directly.
+- file_organization: organize files into directories and folders.
+- reuse: prefer to reuse existing code instead of writing it from scratch. 
+- code_preservation: Preserve What Works. Don't modify working components without necessity.
+- systematic_sequence: Complete one step completely before starting another. Keep systematic sequence of functionalities.
+- design_patterns: apply appropriate design patterns for maintainability. Plan for future changes, extendable flexible, scalable, and maintainable code.
+- proactive_testing: any functionality codes should be accompanied with proper test code as in <TESTING>.
+- Clearly understand the task requirements, acceptance criteria, and any dependencies from `tasks/tasks.md` and the PRD.
+- Before making significant changes:
+    *   **Identify Impact:** Determine affected components, dependencies, and potential side effects.
+    *   **Plan:** Outline the steps. Tackle one logical change or file at a time.
+    *   **Verify Testing:** Confirm how the change will be tested. Add tests if necessary *before* implementing (see TDD).
+- Keep `docs/status.md` updated with task progress (in-progress, completed, blocked), issues encountered, and completed items.
+- Update `tasks/tasks.md` upon task completion or if requirements change during implementation
+
+
+
+</PROGRAMMING PRINCIPLES>
+
+<SYSTEMATIC CODE PROTOCOL>
+[Step: 1]
+<ANALYZE CODE>
+<DEPENDENCY ANALYSIS>
+- Which components will be affected?
+- What dependencies exist?
+- Is this local or does it affect core logic?
+- Which functionalities will be affected and how?
+- What cascading effects will this change have?
+</DEPENDENCY ANALYSIS>
+<FLOW ANALYSIS>
+- Before proposing any changes, conduct a complete end-to-end flow analysis of the relevant use case from the entry point (e.g., function call, variable initialization) to the execution of all affected code. 
+- Track the flow of data and logic throughout all components involved to understand its full scope.
+</FLOW ANALYSIS>
+- Document these dependencies thoroughly, including the specific usage of functions or logic in files specified by @memory.mdc
+</ANALYZE CODE>
+
+[Step: 2]
+<PLAN CODE>
+- If needed initiate <CLARIFICATION> process.
+- Use <STEP BY STEP REASONING> to Outline a detailed plan including component dependencies, architectural considerations before coding. Use <REASONING PRESENTATION> to Explain all code changes, what each part does, and how it affects other areas.
+<STRUCTURED PROPOSALS>
+- Provide a proposal that specifies: 1) what files, functions, or lines of code are being changed; 2) why the change is necessary (i.e. bug fix, improvement or new feature); 3) all of the directly impacted modules or files; 4) potential side effects; 5) a detailed explanation of any tradeoffs.
+
+- Clarity is Key: Provide clear, specific, and unambiguous instructions to the AI. Define the desired outcome, constraints, and context.
+- Context Referencing: If a task spans multiple interactions, explicitly remind the AI of relevant previous context, decisions, or code snippets.
+- Suggest vs. Apply: Clearly state whether the AI should *suggest* a change for human review or *apply* a change directly (use only when high confidence and task is well-defined). Use prefixes like "Suggestion:" or "Applying fix:".
+- Question AI Output: Human developers should critically review AI-generated code. Question assumptions, verify logic, and don't blindly trust confident-sounding but potentially incorrect suggestions (hallucinations).
+- Focus the AI: Guide the AI to work on specific, focused parts of the task. Avoid overly broad requests that might lead to architectural or logical errors.
+- Leverage Strengths: Use the AI for tasks it excels at (boilerplate generation, refactoring specific patterns, finding syntax errors, generating test cases) but maintain human oversight for complex logic, architecture, and security.
+- Incremental Interaction: Break down complex tasks into smaller steps for the AI. Review and confirm each step before proceeding.
+- Standard Check-in (for AI on large tasks): Before providing significant code suggestions:
+    *   "Confirming understanding: I've reviewed [specific document/previous context]. The goal is [task goal], adhering to [key pattern/constraint]. Proceeding with [planned step]." (This replaces the more robotic "STOP AND VERIFY").
+
+
+</STRUCTURED PROPOSALS> 
+</PLAN CODE>
+
+[Step: 3]
+<MAKE CHANGES>
+
+1. Document Current State in files specified by @memory.mdc
+- What's currently working?
+- What's the current error/issue?
+- Which files will be affected?
+
+2. Plan Single Logical Change at a Time
+<INCREMENTAL ROLLOUTS>
+- One logical feature at a time
+- But fully resolve this one change by accomodating appropriate changes in other parts of the code.
+- Adjust all existing dependencies and issues created by this change.
+- architecture_preservation: Ensure that all new code integrates seamlessly with existing project structure and architecture before committing changes. Do not make changes that disrupt existing code organization or files.
+</INCREMENTAL ROLLOUTS>
+
+3. Simulation Testing
+<SIMULATION ANALYSIS>
+- Simulate user interactions and behaviors by performing dry runs, trace calls, or other appropriate methods to rigorously analyze the impact of proposed changes on both expected and edge-case scenarios. 
+- Generate feedback on all potential side effects.
+</SIMULATION ANALYSIS>
+<SIMULATION VALIDATION>
+- Do not propose a change unless the simulation passes and verifies that all existing functionality is preserved, and if a simulation breaks, provide fixes immediately before proceeding.
+</SIMULATION VALIDATION>
+- If Simulation Testing Passes, do the actual implementation.
+</MAKE CHANGES>
+
+[Step: 4] Perform <TESTING>.
+
+[Step: 5] LOOP 1-4 and implement all changes
+- Incorporate all the changes systematically, one by one.
+- Verify the changes and test them one by one.
+
+[Step: 6] Optimize the implemented codes
+- Optimize the implemented code, after all changes are tested and verified.
+
+</SYSTEMATIC CODE PROTOCOL>
+
+<REFERENCE>
+- Reference relevant documentation and best practices
+- Use <WEB USE> if needed to refer to documentation or best practices
+</REFERENCE>
+
+# TESTING (Always write TEST after IMPLEMENTATION) [ACT/Code MODE]
+<TESTING>
+
+<DEPENDENCY BASED TESTING>
+Create unit tests for any new functionality. Run all tests from the <ANALYZE CODE> to confirm that existing behavior is still as expected.
+</DEPENDENCY BASED TESTING>
+<NO BREAKAGE ASSERTION>
+After you propose a change, run the tests yourself, and verify that it passes. Do not rely on me to do this, and be certain that my code will not be broken.
+</NO BREAKAGE ASSERTION>
+
+1. Write test logic in seperate files than the code implementation for teh functionality to keep the code clean and maintainable
+
+<TEST PLAN>
+- Think of sufficiently exhaustive test plans for the functionalities added/updated against the requirements and desired outcomes.
+- Define comprehensive test scenarios covering edge cases
+- Specify appropriate validation methods for the project's stack
+- Suggest monitoring approaches to verify the solution's effectiveness
+- Consider potential regressions and how to prevent them
+
+- Strong Focus on Test-Driven Development (TDD):
+      **New Features:** Outline tests, write failing tests, implement code, refactor.
+      **Bug Fixes:** Write a test reproducing the bug *before* fixing it.
+- Comprehensive Tests: Write thorough unit, integration, and/or end-to-end tests covering critical paths, edge cases, and major functionality.
+- Tests Must Pass: All tests **must** pass before committing or considering a task complete. Notify the human developer immediately if tests fail and cannot be easily fixed.
+- No Mock Data (Except Tests): Use mock data *only* within test environments. Development and production should use real or realistic data sources.
+- Manual Verification: Supplement automated tests with manual checks where appropriate, especially for UI changes.
+
+</TEST PLAN>
+
+2. Write test code for ANY added critical functionality ALWAYS. For initial test generation use <DEPENDENCY BASED TESTING> and <NO BREAKAGE ASSERTION>. Then use <TEST PLAN> to write code for extensive testing.
+3. Document testing as specified in @memory.mdc
+</TESTING>
+
+- When implementing something new, be relentless and implement everything to the letter. Stop only when you're done till successfully testing, not before.
+
+<REFACTORING>
+- Purposeful Refactoring: Refactor to improve clarity, reduce duplication, simplify complexity, or adhere to architectural goals.
+- Holistic Check: When refactoring, look for duplicate code, similar components/files, and opportunities for consolidation across the affected area.
+- Edit, Don't Copy: Modify existing files directly. Do not duplicate files and rename them (e.g., `component-v2.tsx`).
+- Verify Integrations: After refactoring, ensure all callers, dependencies, and integration points function correctly. Run relevant tests.
+
+</REFACTORING>
+
+<TROUBLESHOOTING>
+-Fix the Root Cause: Prioritize fixing the underlying issue causing an error, rather than just masking or handling it, unless a temporary workaround is explicitly agreed upon.
+-Console/Log Analysis: Always check browser and server console output for errors, warnings, or relevant logs after making changes or when debugging. Report findings.
+-Targeted Logging: For persistent or complex issues, add specific `console.log` statements (or use a project logger) to trace execution and variable states. *Remember to check the output.*
+- Check the `fixes/` Directory: Before deep-diving into a complex or recurring bug, check `fixes/` for documented solutions to similar past issues.
+- Document Complex Fixes: If a bug requires significant effort (multiple iterations, complex logic) to fix, create a concise `.md` file in the `fixes/` directory detailing the problem, investigation steps, and the solution. Name it descriptively (e.g., `fixes/resolve-race-condition-in-user-update.md`).
+- Research: Use available tools (Firecrawl, documentation search, etc.) to research solutions or best practices when stuck or unsure.
+
+</TROUBLESHOOTING> 
