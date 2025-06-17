@@ -66,39 +66,62 @@ class CollisionSystem(System):
             # Check boundary collisions
             hit_boundary = False
             
-            # Left boundary
-            if left <= 0:
-                position.x = collision.width / 2
-                if velocity and collision.collision_type == CollisionType.BALL:
-                    velocity.reflect_x()
-                    velocity.scale_velocity(collision.bounce_factor)
-                hit_boundary = True
+            # For balls, allow them to go off left and right sides for scoring
+            # Only bounce off top and bottom boundaries
+            if collision.collision_type == CollisionType.BALL:
+                # Top boundary
+                if top <= 0:
+                    position.y = collision.height / 2
+                    if velocity:
+                        velocity.reflect_y()
+                        velocity.scale_velocity(collision.bounce_factor)
+                    hit_boundary = True
+                
+                # Bottom boundary
+                elif bottom >= self.config.SCREEN_HEIGHT:
+                    position.y = self.config.SCREEN_HEIGHT - collision.height / 2
+                    if velocity:
+                        velocity.reflect_y()
+                        velocity.scale_velocity(collision.bounce_factor)
+                    hit_boundary = True
+                
+                # Note: No left/right boundary handling for balls - allow them to go off screen for scoring
             
-            # Right boundary
-            elif right >= self.config.SCREEN_WIDTH:
-                position.x = self.config.SCREEN_WIDTH - collision.width / 2
-                if velocity and collision.collision_type == CollisionType.BALL:
-                    velocity.reflect_x()
-                    velocity.scale_velocity(collision.bounce_factor)
-                hit_boundary = True
+            else:
+                # For non-ball entities (like paddles), handle all boundaries normally
+                # Left boundary
+                if left <= 0:
+                    position.x = collision.width / 2
+                    if velocity:
+                        velocity.reflect_x()
+                        velocity.scale_velocity(collision.bounce_factor)
+                    hit_boundary = True
+                
+                # Right boundary
+                elif right >= self.config.SCREEN_WIDTH:
+                    position.x = self.config.SCREEN_WIDTH - collision.width / 2
+                    if velocity:
+                        velocity.reflect_x()
+                        velocity.scale_velocity(collision.bounce_factor)
+                    hit_boundary = True
+                
+                # Top boundary
+                if top <= 0:
+                    position.y = collision.height / 2
+                    if velocity:
+                        velocity.reflect_y()
+                        velocity.scale_velocity(collision.bounce_factor)
+                    hit_boundary = True
+                
+                # Bottom boundary
+                elif bottom >= self.config.SCREEN_HEIGHT:
+                    position.y = self.config.SCREEN_HEIGHT - collision.height / 2
+                    if velocity:
+                        velocity.reflect_y()
+                        velocity.scale_velocity(collision.bounce_factor)
+                    hit_boundary = True
             
-            # Top boundary
-            if top <= 0:
-                position.y = collision.height / 2
-                if velocity and collision.collision_type == CollisionType.BALL:
-                    velocity.reflect_y()
-                    velocity.scale_velocity(collision.bounce_factor)
-                hit_boundary = True
-            
-            # Bottom boundary
-            elif bottom >= self.config.SCREEN_HEIGHT:
-                position.y = self.config.SCREEN_HEIGHT - collision.height / 2
-                if velocity and collision.collision_type == CollisionType.BALL:
-                    velocity.reflect_y()
-                    velocity.scale_velocity(collision.bounce_factor)
-                hit_boundary = True
-            
-            # Keep paddles within screen bounds
+            # Keep paddles within screen bounds (additional safety for paddles)
             if collision.collision_type == CollisionType.PADDLE:
                 if top < 0:
                     position.y = collision.height / 2
