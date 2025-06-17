@@ -34,11 +34,14 @@ class RenderSystem(System):
         # Background color
         self.background_color = (0, 0, 0)  # Black
         
-        # Debug rendering settings
-        self.debug_font = None
-        if config.DEBUG_MODE:
-            pygame.font.init()
-            self.debug_font = pygame.font.Font(None, 24)
+        # Score tracking
+        self.player1_score = 0
+        self.player2_score = 0
+        
+        # Font initialization
+        pygame.font.init()
+        self.score_font = pygame.font.Font(None, 72)
+        self.debug_font = pygame.font.Font(None, 24) if config.DEBUG_MODE else None
     
     def get_required_components(self) -> Set[Type[Component]]:
         """Return the components required by this system."""
@@ -70,6 +73,9 @@ class RenderSystem(System):
         
         # Draw center line
         self._draw_center_line()
+        
+        # Draw scoreboard
+        self._draw_scoreboard()
     
     def _get_renderable_entities(self, entities: List[EntityID]) -> List[tuple]:
         """Get entities that can be rendered, with their components."""
@@ -164,4 +170,37 @@ class RenderSystem(System):
     
     def clear_surface_cache(self) -> None:
         """Clear the surface cache."""
-        self.surface_cache.clear() 
+        self.surface_cache.clear()
+    
+    def update_scores(self, player1_score: int, player2_score: int) -> None:
+        """Update the scores to display."""
+        self.player1_score = player1_score
+        self.player2_score = player2_score
+    
+    def _draw_scoreboard(self) -> None:
+        """Draw the scoreboard."""
+        # Score colors
+        score_color = (255, 255, 255)  # White
+        
+        # Create score text surfaces
+        player1_text = self.score_font.render(str(self.player1_score), True, score_color)
+        player2_text = self.score_font.render(str(self.player2_score), True, score_color)
+        
+        # Position scores on screen
+        screen_center_x = self.config.SCREEN_WIDTH // 2
+        score_y = 50
+        score_offset = 100
+        
+        # Player 1 score (left side)
+        player1_rect = player1_text.get_rect()
+        player1_rect.centerx = screen_center_x - score_offset
+        player1_rect.centery = score_y
+        
+        # Player 2 score (right side)
+        player2_rect = player2_text.get_rect()
+        player2_rect.centerx = screen_center_x + score_offset
+        player2_rect.centery = score_y
+        
+        # Draw scores
+        self.screen.blit(player1_text, player1_rect)
+        self.screen.blit(player2_text, player2_rect) 

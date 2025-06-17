@@ -177,6 +177,9 @@ class Game:
         # Update all systems
         self.system_manager.update_all_systems(dt)
         
+        # Update scoreboard
+        self.render_system.update_scores(self.player1_score, self.player2_score)
+        
         # Check for scoring
         self._check_scoring()
         
