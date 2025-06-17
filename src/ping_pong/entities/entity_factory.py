@@ -13,6 +13,7 @@ from ..components.velocity import VelocityComponent
 from ..components.render import RenderComponent
 from ..components.collision import CollisionComponent, CollisionType
 from ..components.input import InputComponent
+from ..components.score import ScoreComponent
 
 
 class EntityFactory:
@@ -20,7 +21,7 @@ class EntityFactory:
     Factory class for creating game entities.
     
     This class provides convenient methods for creating common game entities
-    like paddles, balls, and UI elements with appropriate components.
+    like paddles, balls, UI elements, and score managers with appropriate components.
     """
     
     def __init__(self, entity_manager: EntityManager, config: GameConfig):
@@ -33,6 +34,7 @@ class EntityFactory:
         self.render_component_type = RenderComponent
         self.collision_component_type = CollisionComponent
         self.input_component_type = InputComponent
+        self.score_component_type = ScoreComponent
     
     def create_paddle(self, x: float, y: float, player_number: int = 1) -> EntityID:
         """
@@ -237,6 +239,29 @@ class EntityFactory:
             collision_mask=[CollisionType.BALL.value]
         )
         self.entity_manager.add_component(entity, collision)
+        
+        return entity
+    
+    def create_score_manager(self) -> EntityID:
+        """
+        Create a score manager entity.
+        
+        This entity manages the game scoring state and doesn't need
+        position or render components since it's purely logical.
+        
+        Returns:
+            Entity ID of the created score manager
+        """
+        entity = self.entity_manager.create_entity()
+        
+        # Score component with configuration from game config
+        score = ScoreComponent(
+            player1_score=0,
+            player2_score=0,
+            winning_score=self.config.WINNING_SCORE,
+            score_to_win=True
+        )
+        self.entity_manager.add_component(entity, score)
         
         return entity
     

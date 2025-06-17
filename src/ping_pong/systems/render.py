@@ -2,13 +2,14 @@
 Render system for drawing entities to the screen.
 """
 
-from typing import List, Set, Type, Dict
+from typing import List, Set, Type, Dict, Optional
 import pygame
 
 from ..core.ecs import EntityID, System
 from ..core.ecs.component import Component
 from ..components.position import PositionComponent
 from ..components.render import RenderComponent
+from ..components.score import ScoreComponent
 from ..core.ecs.entity_manager import EntityManager
 from ..core.config import GameConfig
 
@@ -39,6 +40,21 @@ class RenderSystem(System):
         if config.DEBUG_MODE:
             pygame.font.init()
             self.debug_font = pygame.font.Font(None, 24)
+        
+        # Score display settings
+        pygame.font.init()
+        self.score_font = pygame.font.Font(None, 72)  # Large font for scores
+        self.game_over_font = pygame.font.Font(None, 48)  # Medium font for game over
+        self.score_color = (255, 255, 255)  # White
+        self.game_over_color = (255, 255, 0)  # Yellow
+        self.winner_color = (0, 255, 0)  # Green
+        
+        # Score manager entity reference
+        self.score_manager_entity = None
+    
+    def set_score_manager_entity(self, score_entity: EntityID) -> None:
+        """Set the score manager entity for score display."""
+        self.score_manager_entity = score_entity
     
     def get_required_components(self) -> Set[Type[Component]]:
         """Return the components required by this system."""
@@ -64,12 +80,15 @@ class RenderSystem(System):
             if render_comp.visible:
                 self._render_entity(entity_id, position, render_comp)
         
+        # Draw center line
+        self._draw_center_line()
+        
+        # Render scores
+        self._render_scores()
+        
         # Render debug information if enabled
         if self.config.DEBUG_MODE:
             self._render_debug_info(dt, len(entities))
-        
-        # Draw center line
-        self._draw_center_line()
     
     def _get_renderable_entities(self, entities: List[EntityID]) -> List[tuple]:
         """Get entities that can be rendered, with their components."""
@@ -135,6 +154,65 @@ class RenderSystem(System):
             )
             y += dash_length + gap_length
     
+    def _render_scores(self) -> None:
+        """Render the current scores on screen."""
+        if not self.score_manager_entity:
+            return
+        
+        score_comp = self.entity_manager.get_component(self.score_manager_entity, ScoreComponent)
+        if not score_comp:
+            return
+        
+        # Calculate positions for score display
+        quarter_width = self.config.SCREEN_WIDTH // 4
+        score_y = 80  # Distance from top of screen
+        
+        # Render Player 1 score (left side)
+        player1_text = self.score_font.render(str(score_comp.player1_score), True, self.score_color)
+        player1_rect = player1_text.get_rect()
+        player1_rect.centerx = quarter_width
+        player1_rect.centery = score_y
+        self.screen.blit(player1_text, player1_rect)
+        
+        # Render Player 2 score (right side) 
+        player2_text = self.score_font.render(str(score_comp.player2_score), True, self.score_color)
+        player2_rect = player2_text.get_rect()
+        player2_rect.centerx = self.config.SCREEN_WIDTH - quarter_width
+        player2_rect.centery = score_y
+        self.screen.blit(player2_text, player2_rect)
+        
+        # Render game over message if applicable
+        if score_comp.game_over:
+            self._render_game_over_message(score_comp)
+    
+    def _render_game_over_message(self, score_comp: ScoreComponent) -> None:
+        """Render game over message and winner announcement."""
+        center_x = self.config.SCREEN_WIDTH // 2
+        center_y = self.config.SCREEN_HEIGHT // 2
+        
+        # Game Over text
+        game_over_text = self.game_over_font.render("GAME OVER", True, self.game_over_color)
+        game_over_rect = game_over_text.get_rect()
+        game_over_rect.centerx = center_x
+        game_over_rect.centery = center_y - 40
+        self.screen.blit(game_over_text, game_over_rect)
+        
+        # Winner text
+        if score_comp.winner:
+            winner_text = self.game_over_font.render(f"Player {score_comp.winner} Wins!", True, self.winner_color)
+            winner_rect = winner_text.get_rect()
+            winner_rect.centerx = center_x
+            winner_rect.centery = center_y + 10
+            self.screen.blit(winner_text, winner_rect)
+        
+        # Instructions text
+        instructions_font = pygame.font.Font(None, 32)
+        instructions_text = instructions_font.render("Press R to restart or ESC to quit", True, self.score_color)
+        instructions_rect = instructions_text.get_rect()
+        instructions_rect.centerx = center_x
+        instructions_rect.centery = center_y + 60
+        self.screen.blit(instructions_text, instructions_rect)
+    
     def _draw_collision_box(self, position: PositionComponent, collision_comp) -> None:
         """Draw collision box for debugging."""
         if collision_comp:
@@ -151,6 +229,14 @@ class RenderSystem(System):
             f"Entities: {entity_count}",
             f"Screen: {self.config.SCREEN_WIDTH}x{self.config.SCREEN_HEIGHT}"
         ]
+        
+        # Add score debug info if available
+        if self.score_manager_entity:
+            score_comp = self.entity_manager.get_component(self.score_manager_entity, ScoreComponent)
+            if score_comp:
+                debug_info.append(f"Scores: {score_comp.player1_score} - {score_comp.player2_score}")
+                if score_comp.last_scorer:
+                    debug_info.append(f"Last scorer: Player {score_comp.last_scorer}")
         
         y_offset = 10
         for info in debug_info:

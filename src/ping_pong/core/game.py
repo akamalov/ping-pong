@@ -15,6 +15,7 @@ from ..systems.movement import MovementSystem
 from ..systems.collision import CollisionSystem
 from ..systems.input import InputSystem
 from ..systems.render import RenderSystem
+from ..systems.score import ScoreSystem
 from ..entities.entity_factory import EntityFactory
 
 
@@ -85,10 +86,7 @@ class Game:
         self.player1_paddle = None
         self.player2_paddle = None
         self.ball = None
-        
-        # Score tracking
-        self.player1_score = 0
-        self.player2_score = 0
+        self.score_manager = None
     
     def _initialize_systems(self) -> None:
         """Initialize and register all game systems."""
@@ -96,20 +94,34 @@ class Game:
         input_system = InputSystem(self.entity_manager)
         movement_system = MovementSystem(self.entity_manager)
         collision_system = CollisionSystem(self.entity_manager, self.config)
+        score_system = ScoreSystem(self.entity_manager, self.config)
         render_system = RenderSystem(self.entity_manager, self.config, self.screen)
         
         # Register systems
         self.system_manager.register_system(input_system)
         self.system_manager.register_system(movement_system)
         self.system_manager.register_system(collision_system)
+        self.system_manager.register_system(score_system)
         self.system_manager.register_system(render_system)
         
         # Store references for easy access
         self.input_system = input_system
         self.render_system = render_system
+        self.score_system = score_system
+        
+        # Set up score system callbacks
+        self.score_system.add_score_callback(self._on_score_event)
+        self.score_system.add_game_over_callback(self._on_game_over_event)
     
     def initialize_game_entities(self) -> None:
         """Create the initial game entities."""
+        # Create score manager first
+        self.score_manager = self.entity_factory.create_score_manager()
+        
+        # Set score manager in systems that need it
+        self.score_system.set_score_manager_entity(self.score_manager)
+        self.render_system.set_score_manager_entity(self.score_manager)
+        
         # Create paddles
         left_pos, right_pos = self.config.get_paddle_positions()
         
@@ -124,6 +136,30 @@ class Game:
         # Create ball at center
         center_x, center_y = self.config.get_screen_center()
         self.ball = self.entity_factory.create_ball(center_x, center_y)
+        
+        # Set ball entity in score system for monitoring
+        self.score_system.set_ball_entity(self.ball)
+    
+    def _on_score_event(self, score_event: dict) -> None:
+        """Handle scoring events from the score system."""
+        player = score_event['player']
+        scores = score_event['scores']
+        
+        print(f"Player {player} scores! Score: {scores[0]} - {scores[1]}")
+        
+        # Reset ball after scoring
+        self._reset_ball()
+    
+    def _on_game_over_event(self, score_event: dict) -> None:
+        """Handle game over events from the score system."""
+        winner = score_event['winner']
+        scores = score_event['scores']
+        
+        print(f"\nGame Over! Player {winner} wins!")
+        print(f"Final Score: {scores[0]} - {scores[1]}")
+        print("Press R to restart or ESC to quit")
+        
+        self.paused = True
     
     def run(self) -> None:
         """Start the main game loop."""
@@ -136,6 +172,7 @@ class Game:
         print("  Player 2: UP/DOWN arrow keys")
         print("  ESC: Quit game")
         print("  P: Pause/Unpause")
+        print("  R: Restart game")
         
         while self.running:
             dt = self.clock.tick(self.config.TARGET_FPS) / 1000.0  # Convert to seconds
@@ -174,53 +211,14 @@ class Game:
     
     def _update_game(self, dt: float) -> None:
         """Update all game systems."""
-        # Update all systems
+        # Update all systems - score system will handle scoring automatically
         self.system_manager.update_all_systems(dt)
-        
-        # Check for scoring
-        self._check_scoring()
-        
-        # Check for game over
-        self._check_game_over()
     
     def _render_game(self) -> None:
         """Render the game (handled by render system)."""
-        # The render system handles all rendering
+        # The render system handles all rendering including scores
         # Just update the display
         pygame.display.flip()
-    
-    def _check_scoring(self) -> None:
-        """Check if a player has scored."""
-        if not self.ball:
-            return
-        
-        ball_pos = self.entity_manager.get_component(self.ball, 
-            self.entity_factory.position_component_type)
-        
-        if ball_pos:
-            # Check if ball went off left or right side
-            if ball_pos.x < 0:
-                # Player 2 scores
-                self.player2_score += 1
-                print(f"Player 2 scores! Score: {self.player1_score} - {self.player2_score}")
-                self._reset_ball()
-            elif ball_pos.x > self.config.SCREEN_WIDTH:
-                # Player 1 scores
-                self.player1_score += 1
-                print(f"Player 1 scores! Score: {self.player1_score} - {self.player2_score}")
-                self._reset_ball()
-    
-    def _check_game_over(self) -> None:
-        """Check if the game is over."""
-        if (self.player1_score >= self.config.WINNING_SCORE or 
-            self.player2_score >= self.config.WINNING_SCORE):
-            
-            winner = "Player 1" if self.player1_score >= self.config.WINNING_SCORE else "Player 2"
-            print(f"\nGame Over! {winner} wins!")
-            print(f"Final Score: {self.player1_score} - {self.player2_score}")
-            print("Press R to restart or ESC to quit")
-            
-            self.paused = True
     
     def _reset_ball(self) -> None:
         """Reset the ball to center with random direction."""
@@ -229,14 +227,16 @@ class Game:
         
         center_x, center_y = self.config.get_screen_center()
         self.ball = self.entity_factory.create_ball(center_x, center_y)
+        
+        # Update score system with new ball entity
+        self.score_system.set_ball_entity(self.ball)
     
     def _reset_game(self) -> None:
         """Reset the entire game."""
         print("Resetting game...")
         
-        # Reset scores
-        self.player1_score = 0
-        self.player2_score = 0
+        # Reset scores using the score system
+        self.score_system.reset_game()
         
         # Reset ball
         self._reset_ball()
@@ -297,5 +297,6 @@ class Game:
             "fps": self.fps_display,
             "system_performance": self.system_manager.get_performance_report(),
             "entity_count": self.entity_manager.get_entity_count(),
-            "config_summary": self.config.get_config_summary()
+            "config_summary": self.config.get_config_summary(),
+            "current_scores": self.score_system.get_current_scores() if self.score_system else None
         } 
