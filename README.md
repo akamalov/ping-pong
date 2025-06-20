@@ -9,8 +9,7 @@ A modern, high-performance ping-pong game built with Python and Pygame using Ent
 - **Configurable Settings**: Customize game behavior via JSON config
 - **Debug Mode**: Performance monitoring and collision visualization
 - **Advanced Physics**: Realistic ball bouncing and paddle interaction
-- **Object Pooling**: Optimized memory management for performance
-- **Component Serialization**: Save/load game state support
+- **Component-Based Design**: Extensible game architecture
 
 ## 🚀 Quick Start
 
@@ -34,7 +33,7 @@ python run_game.py
 # Run as module
 python -m ping_pong
 
-# With command line options
+# With command line options  
 python run_game.py --debug --windowed --fps 120
 ```
 
@@ -59,18 +58,42 @@ Game settings are stored in `config.json`:
   "SCREEN_WIDTH": 800,
   "SCREEN_HEIGHT": 600,
   "TARGET_FPS": 60,
-  "PADDLE_SPEED": 300,
+  "FULLSCREEN": false,
+  "VSYNC": true,
   "BALL_SPEED": 250,
+  "PADDLE_SPEED": 300,
   "WINNING_SCORE": 5,
-  "DEBUG_MODE": false
+  "BALL_SPEED_INCREASE": 1.05,
+  "MAX_BALL_SPEED": 500,
+  "BALL_BOUNCE_FACTOR": 1.0,
+  "PADDLE_BOUNCE_FACTOR": 1.1,
+  "WALL_BOUNCE_FACTOR": 1.0,
+  "PADDLE_WIDTH": 15,
+  "PADDLE_HEIGHT": 80,
+  "PADDLE_OFFSET": 50.0,
+  "BALL_SIZE": 12,
+  "BALL_TRAIL_LENGTH": 5,
+  "MASTER_VOLUME": 0.8,
+  "SFX_VOLUME": 1.0,
+  "MUSIC_VOLUME": 0.6,
+  "AUDIO_ENABLED": true,
+  "ENABLE_VSYNC": true,
+  "ENABLE_PERFORMANCE_MONITORING": false,
+  "MAX_FRAME_TIME_MS": 16.67,
+  "DEBUG_MODE": true,
+  "SHOW_FPS": true,
+  "SHOW_COLLISION_BOXES": true,
+  "SHOW_PERFORMANCE_STATS": false,
+  "INPUT_BUFFER_SIZE": 8
 }
 ```
 
 ### Key Settings
 
 - **Display**: Resolution, fullscreen, VSync
-- **Gameplay**: Paddle/ball speeds, winning score
-- **Physics**: Bounce factors, speed increases
+- **Gameplay**: Paddle/ball speeds, winning score, speed increases
+- **Physics**: Bounce factors, collision settings
+- **Audio**: Volume controls and audio settings
 - **Debug**: Collision boxes, FPS display, performance monitoring
 
 ## 🏗️ Architecture
@@ -98,9 +121,10 @@ Game settings are stored in `config.json`:
 
 ### Performance Features
 
-- **Object Pooling**: Reuses component instances for memory efficiency
+- **Component-Based Architecture**: Clean separation of concerns
 - **System Profiling**: Tracks system execution times
 - **Configurable Quality**: Adjust settings for different hardware
+- **Efficient Collision Detection**: Optimized for real-time gameplay
 
 ## 📁 Project Structure
 
@@ -109,19 +133,62 @@ ping-pong/
 ├── src/ping_pong/           # Main game package
 │   ├── core/                # Core ECS and game systems
 │   │   ├── ecs/            # ECS framework
+│   │   │   ├── entity_manager.py
+│   │   │   ├── component_manager.py
+│   │   │   ├── system_manager.py
+│   │   │   ├── component.py
+│   │   │   └── system.py
 │   │   ├── config.py       # Configuration management
 │   │   └── game.py         # Main game class
 │   ├── components/         # Game components
+│   │   ├── position.py     # Position component
+│   │   ├── velocity.py     # Velocity component
+│   │   ├── render.py       # Render component
+│   │   ├── collision.py    # Collision component
+│   │   └── input.py        # Input component
 │   ├── systems/           # Game systems
+│   │   ├── movement.py    # Movement system
+│   │   ├── collision.py   # Collision system
+│   │   ├── render.py      # Render system
+│   │   └── input.py       # Input system
 │   ├── entities/          # Entity factory
+│   │   └── entity_factory.py
 │   └── __main__.py        # Entry point
 ├── docs/                  # Documentation
-├── requirements.txt       # Dependencies
-├── config.json           # Game configuration
-└── run_game.py          # Simple run script
+│   ├── architecture.md    # System architecture details
+│   ├── product_requirement_docs.md # Product requirements
+│   └── technical.md       # Technical documentation
+├── prompts/              # APM framework prompts
+├── requirements.txt      # Dependencies
+├── requirements-dev.txt  # Development dependencies
+├── config.json          # Game configuration
+├── run_game.py         # Simple run script
+└── final_review_gate.py # Interactive review script
 ```
 
 ## 🛠️ Development
+
+### Dependencies
+
+**Runtime Dependencies:**
+```
+pygame-ce==2.4.1
+numpy==1.24.3
+dataclasses-json==0.5.9
+typing-extensions==4.7.1
+```
+
+**Development Dependencies:**
+```
+pytest==7.4.0
+pytest-cov==4.1.0
+pytest-mock==3.11.1
+black==23.7.0
+pylint==2.17.4
+mypy==1.4.1
+pre-commit==3.3.3
+sphinx==7.1.1
+```
 
 ### Running Tests
 
@@ -164,17 +231,30 @@ python run_game.py --debug
 ## 📊 Performance
 
 Target specifications:
-- **60 FPS** at 1080p resolution
-- **< 50MB** memory usage
-- **< 5ms** frame time
-- **Object pooling** for zero-allocation gameplay
+- **60 FPS** at 800x600 resolution
+- **Responsive controls** with minimal input latency  
+- **Efficient rendering** with layer-based drawing
+- **Clean architecture** for maintainability
 
 ## 🎯 Game Rules
 
-1. First player to reach the winning score (default: 5) wins
-2. Ball speed increases slightly after each paddle hit
-3. Ball angle changes based on where it hits the paddle
-4. Ball resets to center after each score
+1. First player to reach the winning score (configurable, default: 5) wins
+2. Ball speed can increase after paddle hits (configurable)
+3. Ball angle changes based on collision dynamics
+4. Ball resets to center after each score with random direction
+
+## 🎮 Command Line Options
+
+```bash
+python run_game.py [OPTIONS]
+
+Options:
+  --config PATH     Path to configuration file (default: config.json)
+  --debug          Enable debug mode with collision boxes and FPS display
+  --windowed       Force windowed mode (disable fullscreen)
+  --fps INTEGER    Target FPS (default: 60)
+  -h, --help       Show help message
+```
 
 ## 🤝 Contributing
 
@@ -216,6 +296,33 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📚 Documentation
 
 For detailed documentation, see the `docs/` directory:
-- `architecture.md` - System architecture details
+- `architecture.md` - System architecture details  
 - `product_requirement_docs.md` - Complete feature specifications
 - `technical.md` - Technical implementation details
+
+## 🎯 Current Implementation Status
+
+### ✅ Completed Features
+- Complete ECS architecture with Entity, Component, and System managers
+- Core game entities: Paddles, Ball, Walls, Goals
+- Physics systems: Movement, Collision detection and response
+- Input handling with configurable key bindings
+- Rendering system with layered drawing
+- Game state management (Playing, Paused)
+- Configuration system with JSON settings
+- Debug mode with performance monitoring
+- Command-line argument support
+
+### 🚧 In Development
+- Advanced AI opponent
+- Audio system integration
+- Particle effects
+- Menu system
+- Game state persistence
+
+### 🔮 Future Enhancements
+- Network multiplayer capability
+- Tournament mode
+- Power-ups and special effects
+- Customizable themes
+- Replay system
